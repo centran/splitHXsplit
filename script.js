@@ -9,8 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const countdownEl = document.getElementById('countdown');
     const progressBar = document.getElementById('progress-bar');
     const randomWordBox = document.getElementById('random-word-box');
+    const container = document.querySelector('.container');
     // Customization Elements
     const bgColorInput = document.getElementById('bg-color-input');
+    const containerBgColorInput = document.getElementById('container-bg-color-input');
+    const wordBoxBgColorInput = document.getElementById('word-box-bg-color-input');
+    const wordTextColorInput = document.getElementById('word-text-color-input');
     const progressColorInput = document.getElementById('progress-color-input');
     const progressDirectionSelect = document.getElementById('progress-direction-select');
     const textSizeSlider = document.getElementById('text-size-slider');
@@ -27,6 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleBgColorChange = (e) => {
         document.body.style.backgroundColor = e.target.value;
+    };
+
+    const handleContainerBgColorChange = (e) => {
+        container.style.backgroundColor = e.target.value;
+    };
+
+    const handleWordBoxBgColorChange = (e) => {
+        randomWordBox.style.backgroundColor = e.target.value;
+    };
+
+    const handleWordTextColorChange = (e) => {
+        randomWordEl.style.color = e.target.value;
     };
 
     const handleProgressColorChange = (e) => {
@@ -181,6 +197,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     bgColorInput.addEventListener('input', handleBgColorChange);
+    containerBgColorInput.addEventListener('input', handleContainerBgColorChange);
+    wordBoxBgColorInput.addEventListener('input', handleWordBoxBgColorChange);
+    wordTextColorInput.addEventListener('input', handleWordTextColorChange);
     progressColorInput.addEventListener('input', handleProgressColorChange);
     progressDirectionSelect.addEventListener('input', handleProgressDirectionChange);
     textSizeSlider.addEventListener('input', handleTextSizeChange);
@@ -190,6 +209,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const initializeSettings = () => {
         // Set initial values from controls
         document.body.style.backgroundColor = bgColorInput.value;
+        container.style.backgroundColor = containerBgColorInput.value;
+        randomWordBox.style.backgroundColor = wordBoxBgColorInput.value;
+        randomWordEl.style.color = wordTextColorInput.value;
         progressBar.style.backgroundColor = progressColorInput.value;
         progressDirection = progressDirectionSelect.value;
         randomWordEl.style.fontSize = `${textSizeSlider.value}rem`;
