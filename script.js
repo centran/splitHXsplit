@@ -129,13 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset progress bar
         progressBar.style.transition = 'none';
-        progressBar.style.width = '0%';
+        progressBar.style.width = '100%'; // Start at full width
         // Force reflow to apply the reset instantly
         void progressBar.offsetWidth;
 
         // Start new transition
         progressBar.style.transition = `width ${durationInSeconds}s linear`;
-        progressBar.style.width = '100%';
+        progressBar.style.width = '0%'; // Transition to empty
 
 
         const updateCountdown = () => {
