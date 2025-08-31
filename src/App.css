@@ -1,7 +1,5 @@
 body {
     font-family: sans-serif;
-    background-color: #f0f0f0;
-    color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -10,7 +8,6 @@ body {
 }
 
 .container {
-    background-color: #fff;
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -20,7 +17,6 @@ body {
 
 h1 {
     text-align: center;
-    color: #007BFF;
 }
 
 .input-area {
@@ -76,7 +72,7 @@ h1 {
     margin-left: 1rem;
 }
 
-#add-word-btn {
+button {
     padding: 0.5rem 1rem;
     border: none;
     background-color: #007BFF;
@@ -85,7 +81,7 @@ h1 {
     cursor: pointer;
 }
 
-#add-word-btn:hover {
+button:hover {
     background-color: #0056b3;
 }
 
@@ -108,6 +104,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    color: #333;
 }
 
 #word-list .remove-word {
@@ -123,7 +120,7 @@ h1 {
 
 #random-word-box {
     position: relative;
-    border: 2px solid #007BFF;
+    border: 2px solid;
     border-radius: 8px;
     height: 150px;
     display: flex;
@@ -141,9 +138,7 @@ h1 {
     left: 0;
     height: 100%;
     width: 0;
-    background-color: #007bff;
     opacity: 0.2;
-    transition: width 0.1s linear;
 }
 
 #random-word {
@@ -155,7 +150,6 @@ h1 {
     bottom: 5px;
     right: 10px;
     font-size: 0.8rem;
-    color: #666;
     z-index: 1;
 }
 
