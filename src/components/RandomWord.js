@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const RandomWord = ({ words, isRunning, setIsRunning, timer, customization }) => {
   const [randomWord, setRandomWord] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const timerIntervalRef = useRef(null);
   const countdownIntervalRef = useRef(null);
   const progressBarRef = useRef(null);
 
@@ -19,19 +18,22 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization }) =>
     setIsRunning(false);
   };
 
-  const pickAndDisplayWord = () => {
+  const pickAndDisplayWord = useCallback(() => {
+    if (words.length === 0) {
+        setIsRunning(false);
+        return;
+    }
     const availableWords = words.filter(w => w !== randomWord);
-    const randomIndex = Math.floor(Math.random() * availableWords.length);
-    const newWord = availableWords[randomIndex];
+    const wordPool = availableWords.length > 0 ? availableWords : words;
+    const randomIndex = Math.floor(Math.random() * wordPool.length);
+    const newWord = wordPool[randomIndex];
     setRandomWord(newWord);
-  };
+  }, [words, randomWord, setIsRunning]);
 
   useEffect(() => {
     if (isRunning) {
       pickAndDisplayWord();
-      timerIntervalRef.current = setInterval(pickAndDisplayWord, timer * 60 * 1000);
     } else {
-      clearInterval(timerIntervalRef.current);
       clearInterval(countdownIntervalRef.current);
       setRandomWord('');
       setCountdown(0);
@@ -40,45 +42,42 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization }) =>
         progressBarRef.current.style.transition = 'none';
       }
     }
-    return () => {
-      clearInterval(timerIntervalRef.current);
-      clearInterval(countdownIntervalRef.current);
-    };
-  }, [isRunning]);
+  }, [isRunning, pickAndDisplayWord]);
 
   useEffect(() => {
-    if (randomWord) {
+    clearInterval(countdownIntervalRef.current);
+
+    if (isRunning && randomWord) {
       const durationInSeconds = timer * 60;
-      let remainingTime = Math.ceil(durationInSeconds);
-      setCountdown(remainingTime);
+      setCountdown(Math.ceil(durationInSeconds));
 
       if (progressBarRef.current) {
-        progressBarRef.current.style.transition = 'none';
-        if (customization.progressDirection === 'drain') {
-          progressBarRef.current.style.width = '100%';
-          void progressBarRef.current.offsetWidth; // Reflow
-          progressBarRef.current.style.transition = `width ${durationInSeconds}s linear`;
-          progressBarRef.current.style.width = '0%';
-        } else {
-          progressBarRef.current.style.width = '0%';
-          void progressBarRef.current.offsetWidth; // Reflow
-          progressBarRef.current.style.transition = `width ${durationInSeconds}s linear`;
-          progressBarRef.current.style.width = '100%';
-        }
+        const bar = progressBarRef.current;
+        bar.style.transition = 'none';
+        bar.style.width = customization.progressDirection === 'drain' ? '100%' : '0%';
+
+        void bar.offsetWidth;
+
+        bar.style.transition = `width ${durationInSeconds}s linear`;
+        bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
       }
 
       countdownIntervalRef.current = setInterval(() => {
         setCountdown(prevCountdown => {
-          if (prevCountdown > 1) {
-            return prevCountdown - 1;
-          } else {
+          if (prevCountdown <= 1) {
             clearInterval(countdownIntervalRef.current);
+            pickAndDisplayWord();
             return 0;
           }
+          return prevCountdown - 1;
         });
       }, 1000);
     }
-  }, [randomWord, timer, customization.progressDirection]);
+
+    return () => {
+      clearInterval(countdownIntervalRef.current);
+    };
+  }, [isRunning, randomWord, timer, customization.progressDirection, pickAndDisplayWord]);
 
   return (
     <div className="random-word-area">
@@ -103,7 +102,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization }) =>
         >
           {randomWord}
         </span>
-        {isRunning && <span id="countdown">{countdown}s</span>}
+        {isRunning && randomWord && <span id="countdown">{countdown}s</span>}
       </div>
       <button onClick={isRunning ? stop : start} className={isRunning ? 'stop' : 'go'}>
         {isRunning ? 'STOP' : 'GO'}
