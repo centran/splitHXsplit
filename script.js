@@ -9,12 +9,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const countdownEl = document.getElementById('countdown');
     const progressBar = document.getElementById('progress-bar');
     const randomWordBox = document.getElementById('random-word-box');
+    // Customization Elements
+    const bgColorInput = document.getElementById('bg-color-input');
+    const progressColorInput = document.getElementById('progress-color-input');
+    const progressDirectionSelect = document.getElementById('progress-direction-select');
+    const textSizeSlider = document.getElementById('text-size-slider');
+
 
     // App state
     let words = [];
     let isRunning = false;
     let timerInterval;
     let countdownInterval;
+    let progressDirection = 'drain'; // Default direction
+
+    // --- Customization ---
+
+    const handleBgColorChange = (e) => {
+        document.body.style.backgroundColor = e.target.value;
+    };
+
+    const handleProgressColorChange = (e) => {
+        progressBar.style.backgroundColor = e.target.value;
+    };
+
+    const handleProgressDirectionChange = (e) => {
+        progressDirection = e.target.value;
+    };
+
+    const handleTextSizeChange = (e) => {
+        randomWordEl.style.fontSize = `${e.target.value}rem`;
+    };
 
     // --- Word Management ---
 
@@ -49,22 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    addWordBtn.addEventListener('click', addWords);
-    wordInput.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-            addWords();
-        }
-    });
-
     // --- Go/Stop Logic ---
-
-    goStopBtn.addEventListener('click', () => {
-        if (isRunning) {
-            stop();
-        } else {
-            start();
-        }
-    });
 
     const start = () => {
         if (words.length < 2) {
@@ -129,13 +139,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset progress bar
         progressBar.style.transition = 'none';
-        progressBar.style.width = '100%'; // Start at full width
-        // Force reflow to apply the reset instantly
-        void progressBar.offsetWidth;
 
-        // Start new transition
-        progressBar.style.transition = `width ${durationInSeconds}s linear`;
-        progressBar.style.width = '0%'; // Transition to empty
+        if (progressDirection === 'drain') {
+            progressBar.style.width = '100%';
+            void progressBar.offsetWidth; // Reflow
+            progressBar.style.transition = `width ${durationInSeconds}s linear`;
+            progressBar.style.width = '0%';
+        } else { // 'fill'
+            progressBar.style.width = '0%';
+            void progressBar.offsetWidth; // Reflow
+            progressBar.style.transition = `width ${durationInSeconds}s linear`;
+            progressBar.style.width = '100%';
+        }
 
 
         const updateCountdown = () => {
@@ -151,6 +166,35 @@ document.addEventListener('DOMContentLoaded', () => {
         countdownInterval = setInterval(updateCountdown, 1000);
     };
 
-    // Set initial button class
-    goStopBtn.classList.add('go');
+    // --- Event Listeners ---
+    addWordBtn.addEventListener('click', addWords);
+    wordInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            addWords();
+        }
+    });
+    goStopBtn.addEventListener('click', () => {
+        if (isRunning) {
+            stop();
+        } else {
+            start();
+        }
+    });
+    bgColorInput.addEventListener('input', handleBgColorChange);
+    progressColorInput.addEventListener('input', handleProgressColorChange);
+    progressDirectionSelect.addEventListener('input', handleProgressDirectionChange);
+    textSizeSlider.addEventListener('input', handleTextSizeChange);
+
+
+    // --- Initialization ---
+    const initializeSettings = () => {
+        // Set initial values from controls
+        document.body.style.backgroundColor = bgColorInput.value;
+        progressBar.style.backgroundColor = progressColorInput.value;
+        progressDirection = progressDirectionSelect.value;
+        randomWordEl.style.fontSize = `${textSizeSlider.value}rem`;
+        goStopBtn.classList.add('go');
+    };
+
+    initializeSettings();
 });
