@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 const RandomWord = ({ words, isRunning, setIsRunning, timer, customization }) => {
   const [randomWord, setRandomWord] = useState('');
   const [countdown, setCountdown] = useState(0);
+  const timerRef = useRef(null);
   const countdownIntervalRef = useRef(null);
   const progressBarRef = useRef(null);
 
@@ -31,54 +32,43 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization }) =>
     });
   }, [words, setIsRunning]);
 
+  const runCycle = useCallback(() => {
+    pickAndDisplayWord();
+    const durationInSeconds = timer * 60;
+    setCountdown(Math.ceil(durationInSeconds));
+
+    if (progressBarRef.current) {
+      const bar = progressBarRef.current;
+      bar.style.transition = 'none';
+      bar.style.width = customization.progressDirection === 'drain' ? '100%' : '0%';
+      void bar.offsetWidth;
+      bar.style.transition = `width ${durationInSeconds}s linear`;
+      bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
+    }
+
+    timerRef.current = setTimeout(runCycle, durationInSeconds * 1000);
+  }, [pickAndDisplayWord, timer, customization.progressDirection]);
+
   useEffect(() => {
     if (isRunning) {
-      pickAndDisplayWord();
+      runCycle();
     } else {
-      clearInterval(countdownIntervalRef.current);
+      clearTimeout(timerRef.current);
       setRandomWord('');
       setCountdown(0);
-      if (progressBarRef.current) {
-        progressBarRef.current.style.width = '0%';
-        progressBarRef.current.style.transition = 'none';
-      }
     }
-  }, [isRunning, pickAndDisplayWord]);
+    return () => clearTimeout(timerRef.current);
+  }, [isRunning, runCycle]);
 
   useEffect(() => {
     clearInterval(countdownIntervalRef.current);
-
-    if (isRunning && randomWord) {
-      const durationInSeconds = timer * 60;
-      setCountdown(Math.ceil(durationInSeconds));
-
-      if (progressBarRef.current) {
-        const bar = progressBarRef.current;
-        bar.style.transition = 'none';
-        bar.style.width = customization.progressDirection === 'drain' ? '100%' : '0%';
-
-        void bar.offsetWidth;
-
-        bar.style.transition = `width ${durationInSeconds}s linear`;
-        bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
-      }
-
+    if (isRunning && countdown > 0) {
       countdownIntervalRef.current = setInterval(() => {
-        setCountdown(prevCountdown => {
-          if (prevCountdown <= 1) {
-            clearInterval(countdownIntervalRef.current);
-            pickAndDisplayWord();
-            return 0;
-          }
-          return prevCountdown - 1;
-        });
+        setCountdown(c => c - 1);
       }, 1000);
     }
-
-    return () => {
-      clearInterval(countdownIntervalRef.current);
-    };
-  }, [isRunning, randomWord, timer, customization.progressDirection, pickAndDisplayWord]);
+    return () => clearInterval(countdownIntervalRef.current);
+  }, [isRunning, countdown]);
 
   return (
     <div className="random-word-area">
