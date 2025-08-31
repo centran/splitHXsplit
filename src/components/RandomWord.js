@@ -19,16 +19,17 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization }) =>
   };
 
   const pickAndDisplayWord = useCallback(() => {
-    if (words.length === 0) {
+    setRandomWord(prevRandomWord => {
+      if (words.length === 0) {
         setIsRunning(false);
-        return;
-    }
-    const availableWords = words.filter(w => w !== randomWord);
-    const wordPool = availableWords.length > 0 ? availableWords : words;
-    const randomIndex = Math.floor(Math.random() * wordPool.length);
-    const newWord = wordPool[randomIndex];
-    setRandomWord(newWord);
-  }, [words, randomWord, setIsRunning]);
+        return '';
+      }
+      const availableWords = words.filter(w => w !== prevRandomWord);
+      const wordPool = availableWords.length > 0 ? availableWords : words;
+      const randomIndex = Math.floor(Math.random() * wordPool.length);
+      return wordPool[randomIndex];
+    });
+  }, [words, setIsRunning]);
 
   useEffect(() => {
     if (isRunning) {
