@@ -1,0 +1,159 @@
+body {
+    font-family: sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+h1 {
+    text-align: center;
+    color: #007BFF;
+}
+
+.input-area {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#word-input {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#add-word-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#add-word-btn:hover {
+    background-color: #0056b3;
+}
+
+.word-list-area {
+    margin-bottom: 1rem;
+}
+
+#word-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+#word-list li {
+    background-color: #e9ecef;
+    padding: 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#word-list .remove-word {
+    cursor: pointer;
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.random-word-area {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+#random-word-box {
+    position: relative;
+    border: 2px solid #007BFF;
+    border-radius: 8px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+#progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background-color: #007bff;
+    opacity: 0.2;
+    transition: width 0.1s linear;
+}
+
+#random-word {
+    z-index: 1;
+}
+
+#countdown {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 0.8rem;
+    color: #666;
+    z-index: 1;
+}
+
+#go-stop-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+#go-stop-btn.go {
+    background-color: #28a745;
+}
+
+#go-stop-btn.go:hover {
+    background-color: #218838;
+}
+
+#go-stop-btn.stop {
+    background-color: #dc3545;
+}
+
+#go-stop-btn.stop:hover {
+    background-color: #c82333;
+}
+
+.timer-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#timer-input {
+    width: 60px;
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}

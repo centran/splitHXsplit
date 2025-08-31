@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Word Picker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Random Word Picker</h1>
+        <div class="random-word-area">
+            <div id="random-word-box">
+                <div id="progress-bar"></div>
+                <span id="random-word"></span>
+                <span id="countdown"></span>
+            </div>
+            <button id="go-stop-btn">GO</button>
+        </div>
+        <div class="input-area">
+            <input type="text" id="word-input" placeholder="Enter a word or words separated by commas">
+            <button id="add-word-btn">Add Word(s)</button>
+        </div>
+        <div class="word-list-area">
+            <h2>Word List</h2>
+            <ul id="word-list"></ul>
+        </div>
+        <div class="timer-area">
+            <label for="timer-input">Switch time (minutes):</label>
+            <input type="number" id="timer-input" min="0.1" step="0.1" value="0.5">
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
