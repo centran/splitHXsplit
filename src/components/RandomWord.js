@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excludeConfig, excludeMap, setExcludeMap }) => {
+const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, showNextWord, excludeConfig, excludeMap, setExcludeMap }) => {
   const [randomWord, setRandomWord] = useState('');
+  const [nextRandomWord, setNextRandomWord] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   
@@ -10,6 +11,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
   const excludeMapRef = useRef(excludeMap || {});
   const excludeConfigRef = useRef(excludeConfig);
   const randomWordRef = useRef('');
+  const nextRandomWordRef = useRef('');
   const remainingTimeRef = useRef(0);
 
   useEffect(() => {
@@ -23,6 +25,10 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
   useEffect(() => {
     randomWordRef.current = randomWord;
   }, [randomWord]);
+
+  useEffect(() => {
+    nextRandomWordRef.current = nextRandomWord;
+  }, [nextRandomWord]);
 
   const start = () => {
     if (words.length < 2) {
@@ -45,6 +51,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
     setIsRunning(false);
     setIsPaused(false);
     setRandomWord('');
+    setNextRandomWord('');
     setCountdown(0);
     remainingTimeRef.current = 0;
     
@@ -132,35 +139,21 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
     }, 1000);
   };
 
-  // pick a new word respecting excludeMap
-  // remove selectNewWord and inline selection in pickAndDisplayWord
-
-  const pickAndDisplayWord = useCallback(() => {
-    if (!isRunning) return;
-
-    if (words.length === 0) {
-      setIsRunning(false);
-      setRandomWord('');
-      return;
-    }
-
-    const prevRandomWord = randomWordRef.current;
+  const selectWord = useCallback((wordsToExclude = []) => {
     const eConfig = excludeConfigRef.current;
     const currentExcludeMap = excludeMapRef.current;
     
-    // Only use exclude logic if cooldown is enabled
-    const excluded = eConfig?.enabled ? new Set(Object.keys(currentExcludeMap || {})) : new Set();
+    const excludedByConfig = eConfig?.enabled ? new Set(Object.keys(currentExcludeMap || {})) : new Set();
+    const wordsToAvoid = new Set(wordsToExclude);
 
-    // Filter available words that are not excluded and not the immediate previous
-    const availableWords = words.filter(w => !excluded.has(w) && w !== prevRandomWord);
+    const availableWords = words.filter(w => !excludedByConfig.has(w) && !wordsToAvoid.has(w));
 
     let wordPool = availableWords;
 
-    // If no non-excluded words are available and cooldown is enabled, find words with lowest cooldown count
     if (wordPool.length === 0 && eConfig?.enabled) {
       const cyclesMap = new Map();
       words.forEach(w => {
-        if (w !== prevRandomWord) {
+        if (!wordsToAvoid.has(w)) {
           cyclesMap.set(w, currentExcludeMap[w] || 0);
         }
       });
@@ -173,21 +166,33 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
       }
     }
 
-    // If still no words available, use all words except previous
     if (wordPool.length === 0) {
-      wordPool = words.filter(w => w !== prevRandomWord);
+      wordPool = words.filter(w => !wordsToAvoid.has(w));
     }
 
     if (wordPool.length === 0 && words.length > 0) {
-      // If all else fails and we have words, just use any word
       wordPool = words;
     }
 
-    const randomIndex = Math.floor(Math.random() * wordPool.length);
-    const newWord = wordPool[randomIndex];
+    if (wordPool.length === 0) {
+      return null;
+    }
 
-    setRandomWord(newWord);
-  }, [isRunning, words, setIsRunning]);
+    const randomIndex = Math.floor(Math.random() * wordPool.length);
+    return wordPool[randomIndex];
+  }, [words]);
+
+  const pickAndDisplayWord = useCallback(() => {
+    if (showNextWord) {
+      const currentNextWord = nextRandomWordRef.current;
+      setRandomWord(currentNextWord);
+      const newNextWord = selectWord([currentNextWord]);
+      setNextRandomWord(newNextWord);
+    } else {
+      const newWord = selectWord([randomWordRef.current]);
+      setRandomWord(newWord);
+    }
+  }, [selectWord, showNextWord]);
 
   // After randomWord updates, adjust excludeMap: decrement existing cycles and add the selected word
   useEffect(() => {
@@ -232,6 +237,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
     if (!isRunning) {
       cleanup();
       setRandomWord('');
+      setNextRandomWord('');
       setCountdown(0);
       return;
     }
@@ -239,7 +245,20 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
     if (isRunning && !isPaused) {
       // Initial setup
       if (countdown === 0) {
-        pickAndDisplayWord();
+        if (showNextWord) {
+          if (words.length < 2) {
+            alert('Please add at least two words to use the "Show next word" feature.');
+            setIsRunning(false);
+            return;
+          }
+          const initialWord = selectWord();
+          const initialNextWord = selectWord([initialWord]);
+          setRandomWord(initialWord);
+          setNextRandomWord(initialNextWord);
+        } else {
+          const initialWord = selectWord();
+          setRandomWord(initialWord);
+        }
         startNewCycle();
       }
 
@@ -260,7 +279,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
     }
 
     return cleanup;
-  }, [isRunning, isPaused, timer, customization.progressDirection, pickAndDisplayWord]);
+  }, [isRunning, isPaused, timer, customization.progressDirection, pickAndDisplayWord, showNextWord, words, selectWord, setIsRunning]);
 
   return (
     <div className="random-word-area">
@@ -287,6 +306,13 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
            customization.textCase === 'lowercase' ? randomWord?.toLowerCase() :
            randomWord}
         </span>
+        {showNextWord && nextRandomWord && (
+          <div id="next-random-word">
+            next: {customization.textCase === 'uppercase' ? nextRandomWord?.toUpperCase() :
+                   customization.textCase === 'lowercase' ? nextRandomWord?.toLowerCase() :
+                   nextRandomWord}
+          </div>
+        )}
         {isRunning && randomWord && <span id="countdown">{countdown}s</span>}
       </div>
       <div className="button-group">

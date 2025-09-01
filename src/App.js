@@ -10,6 +10,7 @@ function App() {
   const [words, setWords] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const [timer, setTimer] = useState(0.5);
+  const [showNextWord, setShowNextWord] = useState(false);
   const [excludeConfig, setExcludeConfig] = useState({
     excludeCount: 3,
     excludeCycles: 2,
@@ -61,6 +62,7 @@ function App() {
         setIsRunning={setIsRunning}
         timer={timer}
         customization={customization}
+        showNextWord={showNextWord}
         excludeConfig={excludeConfig}
         excludeMap={excludeMap}
         setExcludeMap={setExcludeMap}
@@ -75,6 +77,8 @@ function App() {
         setExcludeConfig={setExcludeConfig}
         customization={customization}
         onCustomizationChange={handleCustomizationChange}
+        showNextWord={showNextWord}
+        setShowNextWord={setShowNextWord}
       />
       <Customization
         customization={customization}
