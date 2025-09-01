@@ -17,6 +17,7 @@ const WordInput = ({ addWords, isRunning }) => {
   return (
     <div className="input-area">
       <input
+        id="word-input"
         type="text"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
