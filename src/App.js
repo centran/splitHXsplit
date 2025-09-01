@@ -10,6 +10,12 @@ function App() {
   const [words, setWords] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const [timer, setTimer] = useState(0.5);
+  const [excludeConfig, setExcludeConfig] = useState({
+    excludeCount: 3,
+    excludeCycles: 2,
+    enabled: false
+  });
+  const [excludeMap, setExcludeMap] = useState({}); // { word: remainingCycles }
   const [customization, setCustomization] = useState({
     bgColor: '#121212',
     containerBgColor: '#1e1e1e',
@@ -20,6 +26,7 @@ function App() {
     progressColor: '#03dac6',
     progressDirection: 'drain',
     textSize: 2,
+    textCase: 'as-is',
   });
 
   const addWords = (newWords) => {
@@ -54,10 +61,21 @@ function App() {
         setIsRunning={setIsRunning}
         timer={timer}
         customization={customization}
+        excludeConfig={excludeConfig}
+        excludeMap={excludeMap}
+        setExcludeMap={setExcludeMap}
       />
       <WordInput addWords={addWords} isRunning={isRunning} />
-      <WordList words={words} removeWord={removeWord} />
-      <Timer timer={timer} setTimer={setTimer} isRunning={isRunning} />
+      <WordList words={words} removeWord={removeWord} excludeMap={excludeMap} excludeConfig={excludeConfig} />
+      <Timer 
+        timer={timer} 
+        setTimer={setTimer} 
+        isRunning={isRunning}
+        excludeConfig={excludeConfig}
+        setExcludeConfig={setExcludeConfig}
+        customization={customization}
+        onCustomizationChange={handleCustomizationChange}
+      />
       <Customization
         customization={customization}
         onCustomizationChange={handleCustomizationChange}
