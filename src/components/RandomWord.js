@@ -4,7 +4,6 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   const [randomWord, setRandomWord] = useState('');
   const [nextRandomWord, setNextRandomWord] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   
   const countdownIntervalRef = useRef(null);
   const progressBarRef = useRef(null);
@@ -12,7 +11,6 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   const excludeConfigRef = useRef(excludeConfig);
   const randomWordRef = useRef('');
   const nextRandomWordRef = useRef('');
-  const remainingTimeRef = useRef(0);
 
   useEffect(() => {
     excludeMapRef.current = excludeMap || {};
@@ -36,7 +34,6 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
       return;
     }
     setIsRunning(true);
-    setIsPaused(false);
   };
 
   const cleanupTimer = () => {
@@ -49,11 +46,9 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   const stop = () => {
     cleanupTimer();
     setIsRunning(false);
-    setIsPaused(false);
     setRandomWord('');
     setNextRandomWord('');
     setCountdown(0);
-    remainingTimeRef.current = 0;
     
     // Reset progress bar to 0% regardless of mode
     if (progressBarRef.current) {
@@ -61,31 +56,6 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
       bar.style.transition = 'none';
       bar.style.width = '0%';
     }
-  };
-
-  const togglePause = () => {
-    setIsPaused(prevPaused => {
-      const newPaused = !prevPaused;
-      const bar = progressBarRef.current;
-
-      if (bar) {
-        if (newPaused) {
-          // PAUSING
-          const computedStyle = window.getComputedStyle(bar);
-          const currentWidth = computedStyle.width;
-          bar.style.transition = 'none';
-          bar.style.width = currentWidth;
-          remainingTimeRef.current = countdown;
-        } else if (isRunning) {
-          // RESUMING
-          const remainingTime = remainingTimeRef.current;
-          bar.style.transition = `width ${remainingTime}s linear`;
-          bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
-          setCountdown(Math.ceil(remainingTime)); // Restore countdown
-        }
-      }
-      return newPaused;
-    });
   };
 
   const skip = () => {
@@ -208,7 +178,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
 
   // Effect for starting the timer and setting initial words
   useEffect(() => {
-    if (isRunning && !isPaused) {
+    if (isRunning) {
       if (showNextWord) {
         if (words.length < 2) {
           alert('Please add at least two words to use the "Show next word" feature.');
@@ -229,11 +199,11 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
       setNextRandomWord('');
       setCountdown(0);
     }
-  }, [isRunning, isPaused, showNextWord, words, selectWord, setIsRunning, startNewCycle]);
+  }, [isRunning, showNextWord, words, selectWord, setIsRunning, startNewCycle]);
 
   // Effect for handling the countdown interval
   useEffect(() => {
-    if (!isRunning || isPaused) {
+    if (!isRunning) {
       cleanupTimer();
       return;
     }
@@ -250,7 +220,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
     }, 1000);
 
     return cleanupTimer;
-  }, [isRunning, isPaused, timer, pickAndDisplayWord, startNewCycle]);
+  }, [isRunning, timer, pickAndDisplayWord, startNewCycle]);
 
   return (
     <div className="random-word-area">
@@ -292,9 +262,6 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
         </button>
         {isRunning && (
           <>
-            <button onClick={togglePause} className="pause-play">
-              {isPaused ? 'PLAY' : 'PAUSE'}
-            </button>
             <button onClick={skip} className="skip">
               SKIP
             </button>
