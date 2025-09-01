@@ -11,6 +11,8 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
   const excludeConfigRef = useRef(excludeConfig);
   const randomWordRef = useRef('');
   const remainingTimeRef = useRef(0);
+  // Shared ref to prevent rapid repeated actions (debounce ~250ms)
+  const lastActionTimeRef = useRef(0);
 
   useEffect(() => {
     excludeMapRef.current = excludeMap || {};
@@ -25,7 +27,12 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
   }, [randomWord]);
 
   const start = () => {
-    if (words.length < 2) {
+  // Prevent rapid repeat clicks
+  const now = Date.now();
+  if (now - lastActionTimeRef.current < 250) return;
+  lastActionTimeRef.current = now;
+
+  if (words.length < 2) {
       alert('Please add at least two words to the list.');
       return;
     }
@@ -41,7 +48,12 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
   };
 
   const stop = () => {
-    cleanupTimer();
+  // Prevent rapid repeated clicks
+  const now = Date.now();
+  if (now - lastActionTimeRef.current < 250) return;
+  lastActionTimeRef.current = now;
+
+  cleanupTimer();
     setIsRunning(false);
     setIsPaused(false);
     setRandomWord('');
@@ -57,6 +69,11 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
   };
 
   const togglePause = () => {
+  // Prevent rapid repeat clicks
+  const now = Date.now();
+  if (now - lastActionTimeRef.current < 250) return;
+  lastActionTimeRef.current = now;
+
     setIsPaused(prev => {
       const newPaused = !prev;
       const bar = progressBarRef.current;
@@ -101,7 +118,11 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
   };
 
   const skip = () => {
-    if (!isRunning) return; // Don't skip if not running
+  if (!isRunning) return; // Don't skip if not running
+  // Ignore rapid repeated clicks (debounce ~250ms)
+  const now = Date.now();
+  if (now - lastActionTimeRef.current < 250) return;
+  lastActionTimeRef.current = now;
     
     cleanupTimer();
     pickAndDisplayWord();
@@ -118,7 +139,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
     }
 
     // Restart the countdown timer
-    countdownIntervalRef.current = setInterval(() => {
+  countdownIntervalRef.current = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           if (isRunning) {
@@ -260,7 +281,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, excl
     }
 
     return cleanup;
-  }, [isRunning, isPaused, timer, customization.progressDirection, pickAndDisplayWord]);
+  }, [isRunning, isPaused, timer, customization.progressDirection, pickAndDisplayWord, countdown]);
 
   return (
     <div className="random-word-area">
