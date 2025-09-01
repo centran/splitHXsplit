@@ -64,43 +64,24 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   };
 
   const togglePause = () => {
-    setIsPaused(prev => {
-      const newPaused = !prev;
+    setIsPaused(prevPaused => {
+      const newPaused = !prevPaused;
       const bar = progressBarRef.current;
-      
+
       if (bar) {
         if (newPaused) {
-          // Store the current computed width when pausing
+          // PAUSING
           const computedStyle = window.getComputedStyle(bar);
           const currentWidth = computedStyle.width;
           bar.style.transition = 'none';
           bar.style.width = currentWidth;
-          // Store current countdown
           remainingTimeRef.current = countdown;
-          cleanupTimer();
-        } else if (isRunning) { // Only resume if still running
-          // Resume the animation from current position
+        } else if (isRunning) {
+          // RESUMING
           const remainingTime = remainingTimeRef.current;
-          
           bar.style.transition = `width ${remainingTime}s linear`;
           bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
-          
-          // Restart countdown from stored time
-          setCountdown(Math.ceil(remainingTime));
-          cleanupTimer(); // Ensure no existing interval
-          countdownIntervalRef.current = setInterval(() => {
-            setCountdown(prev => {
-              if (prev <= 1) {
-                if (isRunning) { // Only proceed if still running
-                  pickAndDisplayWord();
-                  const durationInSeconds = timer * 60;
-                  return durationInSeconds;
-                }
-                return prev;
-              }
-              return prev - 1;
-            });
-          }, 1000);
+          setCountdown(Math.ceil(remainingTime)); // Restore countdown
         }
       }
       return newPaused;
@@ -211,75 +192,65 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
     });
   }, [randomWord, setExcludeMap, isRunning]);
 
-  // Handle the timer cycle
+  const startNewCycle = useCallback(() => {
+    const durationInSeconds = timer * 60;
+    setCountdown(Math.ceil(durationInSeconds));
+
+    if (progressBarRef.current) {
+      const bar = progressBarRef.current;
+      bar.style.transition = 'none';
+      bar.style.width = customization.progressDirection === 'drain' ? '100%' : '0%';
+      void bar.offsetWidth;
+      bar.style.transition = `width ${durationInSeconds}s linear`;
+      bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
+    }
+  }, [timer, customization.progressDirection]);
+
+  // Effect for starting the timer and setting initial words
   useEffect(() => {
-    const startNewCycle = () => {
-      const durationInSeconds = timer * 60;
-      setCountdown(Math.ceil(durationInSeconds));
-
-      if (progressBarRef.current) {
-        const bar = progressBarRef.current;
-        bar.style.transition = 'none';
-        bar.style.width = customization.progressDirection === 'drain' ? '100%' : '0%';
-        void bar.offsetWidth;
-        bar.style.transition = `width ${durationInSeconds}s linear`;
-        bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
+    if (isRunning && !isPaused) {
+      if (showNextWord) {
+        if (words.length < 2) {
+          alert('Please add at least two words to use the "Show next word" feature.');
+          setIsRunning(false);
+          return;
+        }
+        const initialWord = selectWord();
+        const initialNextWord = selectWord([initialWord]);
+        setRandomWord(initialWord);
+        setNextRandomWord(initialNextWord);
+      } else {
+        const initialWord = selectWord();
+        setRandomWord(initialWord);
       }
-    };
-
-    const cleanup = () => {
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
-        countdownIntervalRef.current = null;
-      }
-    };
-
-    if (!isRunning) {
-      cleanup();
+      startNewCycle();
+    } else if (!isRunning) {
       setRandomWord('');
       setNextRandomWord('');
       setCountdown(0);
+    }
+  }, [isRunning, isPaused, showNextWord, words, selectWord, setIsRunning, startNewCycle]);
+
+  // Effect for handling the countdown interval
+  useEffect(() => {
+    if (!isRunning || isPaused) {
+      cleanupTimer();
       return;
     }
 
-    if (isRunning && !isPaused) {
-      // Initial setup
-      if (countdown === 0) {
-        if (showNextWord) {
-          if (words.length < 2) {
-            alert('Please add at least two words to use the "Show next word" feature.');
-            setIsRunning(false);
-            return;
-          }
-          const initialWord = selectWord();
-          const initialNextWord = selectWord([initialWord]);
-          setRandomWord(initialWord);
-          setNextRandomWord(initialNextWord);
-        } else {
-          const initialWord = selectWord();
-          setRandomWord(initialWord);
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          pickAndDisplayWord();
+          startNewCycle();
+          return timer * 60;
         }
-        startNewCycle();
-      }
+        return prev - 1;
+      });
+    }, 1000);
 
-      cleanup(); // Ensure no existing interval
-      countdownIntervalRef.current = setInterval(() => {
-        setCountdown(prev => {
-          if (!isRunning || isPaused) {
-            return prev;
-          }
-          if (prev <= 1) {
-            pickAndDisplayWord();
-            startNewCycle();
-            return timer * 60;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return cleanup;
-  }, [isRunning, isPaused, timer, customization.progressDirection, pickAndDisplayWord, showNextWord, words, selectWord, setIsRunning]);
+    return cleanupTimer;
+  }, [isRunning, isPaused, timer, pickAndDisplayWord, startNewCycle]);
 
   return (
     <div className="random-word-area">
