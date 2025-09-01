@@ -25,6 +25,26 @@ const Customization = ({ customization, onCustomizationChange }) => {
         />
       </div>
       <div className="control-group">
+        <label htmlFor="progress-color-input">Progress Bar Color:</label>
+        <input
+          type="color"
+          id="progress-color-input"
+          value={customization.progressColor}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="control-group">
+        <label htmlFor="progress-direction-select">Progress Bar Mode:</label>
+        <select
+          id="progress-direction-select"
+          value={customization.progressDirection}
+          onChange={handleChange}
+        >
+          <option value="drain">Drain</option>
+          <option value="fill">Fill</option>
+        </select>
+      </div>
+      <div className="control-group">
         <label htmlFor="bg-color-input">Page Background:</label>
         <input
           type="color"
@@ -77,26 +97,6 @@ const Customization = ({ customization, onCustomizationChange }) => {
           value={customization.wordBoxBorderColor}
           onChange={handleChange}
         />
-      </div>
-      <div className="control-group">
-        <label htmlFor="progress-color-input">Progress Bar Color:</label>
-        <input
-          type="color"
-          id="progress-color-input"
-          value={customization.progressColor}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="control-group">
-        <label htmlFor="progress-direction-select">Progress Bar Mode:</label>
-        <select
-          id="progress-direction-select"
-          value={customization.progressDirection}
-          onChange={handleChange}
-        >
-          <option value="drain">Drain</option>
-          <option value="fill">Fill</option>
-        </select>
       </div>
     </div>
   );

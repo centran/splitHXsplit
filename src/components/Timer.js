@@ -59,16 +59,6 @@ const Timer = ({ timer, setTimer, isRunning, excludeConfig, setExcludeConfig, cu
         </div>
       </div>
       <div className="cool-down-section">
-        <div>
-          <input
-            type="checkbox"
-            id="exclude-toggle"
-            checked={excludeConfig.enabled}
-            onChange={(e) => setExcludeConfig({ ...excludeConfig, enabled: e.target.checked })}
-            disabled={isRunning}
-          />
-          <label htmlFor="exclude-toggle">Cooldown settings</label>
-        </div>
         <div className="show-next-word-control">
           <input
             type="checkbox"
@@ -78,6 +68,16 @@ const Timer = ({ timer, setTimer, isRunning, excludeConfig, setExcludeConfig, cu
             disabled={isRunning}
           />
           <label htmlFor="show-next-word-checkbox">Show next word</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            id="exclude-toggle"
+            checked={excludeConfig.enabled}
+            onChange={(e) => setExcludeConfig({ ...excludeConfig, enabled: e.target.checked })}
+            disabled={isRunning}
+          />
+          <label htmlFor="exclude-toggle">Cooldown settings</label>
         </div>
         <div>
           <label htmlFor="words-count">Exclude X words:</label>
