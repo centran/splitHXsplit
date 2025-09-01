@@ -1,0 +1,43 @@
+.save-load-area {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #444;
+}
+
+.save-load-area h2 {
+    margin-bottom: 15px;
+}
+
+.save-load-area .control-group {
+    margin-bottom: 15px;
+}
+
+.save-load-area textarea {
+    width: 100%;
+    min-height: 80px;
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 8px;
+    font-family: monospace;
+}
+
+.save-load-area .button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.save-load-area button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #bb86fc;
+    color: #121212;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.save-load-area button:hover {
+    background-color: #a06cd5;
+}

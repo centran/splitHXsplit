@@ -5,6 +5,8 @@ import WordList from './components/WordList';
 import RandomWord from './components/RandomWord';
 import Timer from './components/Timer';
 import Customization from './components/Customization';
+import SaveLoad from './components/SaveLoad';
+import './components/SaveLoad.css';
 
 function App() {
   const [words, setWords] = useState([]);
@@ -48,10 +50,30 @@ function App() {
     setCustomization({ ...customization, ...newCustomization });
   };
 
+  const handleLoadState = (loadedState) => {
+    // Add validation and defaults here if necessary
+    if (loadedState.words) setWords(loadedState.words);
+    if (loadedState.timer) setTimer(loadedState.timer);
+    if (loadedState.showNextWord) setShowNextWord(loadedState.showNextWord);
+    if (loadedState.excludeConfig) setExcludeConfig(loadedState.excludeConfig);
+    if (loadedState.customization) setCustomization(loadedState.customization);
+    // Reset transient state
+    setIsRunning(false);
+    setExcludeMap({});
+  };
+
   useEffect(() => {
     document.body.style.backgroundColor = customization.bgColor;
     document.body.style.color = customization.globalTextColor;
   }, [customization.bgColor, customization.globalTextColor]);
+
+  const settings = {
+    words,
+    timer,
+    showNextWord,
+    excludeConfig,
+    customization
+  };
 
   return (
     <div className="container" style={{ backgroundColor: customization.containerBgColor }}>
@@ -84,6 +106,7 @@ function App() {
         customization={customization}
         onCustomizationChange={handleCustomizationChange}
       />
+      <SaveLoad settings={settings} onLoad={handleLoadState} />
     </div>
   );
 }
