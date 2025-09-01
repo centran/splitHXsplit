@@ -4,9 +4,6 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   const [randomWord, setRandomWord] = useState('');
   const [nextRandomWord, setNextRandomWord] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [isTogglingPause, setIsTogglingPause] = useState(false);
-  const [isSkipping, setIsSkipping] = useState(false);
   
   const countdownIntervalRef = useRef(null);
   const progressBarRef = useRef(null);
@@ -14,7 +11,6 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   const excludeConfigRef = useRef(excludeConfig);
   const randomWordRef = useRef('');
   const nextRandomWordRef = useRef('');
-  const remainingTimeRef = useRef(0);
 
   useEffect(() => {
     excludeMapRef.current = excludeMap || {};
@@ -38,7 +34,6 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
       return;
     }
     setIsRunning(true);
-    setIsPaused(false);
   };
 
   const cleanupTimer = () => {
@@ -51,11 +46,9 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   const stop = () => {
     cleanupTimer();
     setIsRunning(false);
-    setIsPaused(false);
     setRandomWord('');
     setNextRandomWord('');
     setCountdown(0);
-    remainingTimeRef.current = 0;
     
     // Reset progress bar to 0% regardless of mode
     if (progressBarRef.current) {
@@ -65,56 +58,8 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
     }
   };
 
-  const togglePause = () => {
-    if (isTogglingPause) return;
-    setIsTogglingPause(true);
-    setTimeout(() => setIsTogglingPause(false), 500); // Debounce time
-
-    setIsPaused(prevPaused => {
-      const newPaused = !prevPaused;
-      const bar = progressBarRef.current;
-
-      if (bar) {
-        if (newPaused) {
-          // PAUSING
-          const computedStyle = window.getComputedStyle(bar);
-          const currentWidth = parseFloat(computedStyle.width);
-          bar.style.transition = 'none';
-          bar.style.width = computedStyle.width;
-
-          const containerWidth = bar.parentElement.offsetWidth;
-          if (containerWidth > 0) {
-            const widthPercent = (currentWidth / containerWidth) * 100;
-            const durationInSeconds = timer * 60;
-
-            let remainingPercent;
-            if (customization.progressDirection === 'drain') {
-              remainingPercent = widthPercent;
-            } else {
-              remainingPercent = 100 - widthPercent;
-            }
-
-            const remainingTime = durationInSeconds * (remainingPercent / 100);
-            remainingTimeRef.current = remainingTime;
-          } else {
-            remainingTimeRef.current = countdown; // Fallback
-          }
-        } else if (isRunning) {
-          // RESUMING
-          const remainingTime = remainingTimeRef.current;
-          bar.style.transition = `width ${remainingTime}s linear`;
-          bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
-          setCountdown(remainingTime); // Restore countdown, no Math.ceil
-        }
-      }
-      return newPaused;
-    });
-  };
-
   const skip = () => {
-    if (isSkipping || !isRunning) return; // Don't skip if not running or already skipping
-    setIsSkipping(true);
-    setTimeout(() => setIsSkipping(false), 500); // Debounce time
+    if (!isRunning) return; // Don't skip if not running
     
     cleanupTimer();
     pickAndDisplayWord();
@@ -233,7 +178,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
 
   // Effect for starting the timer and setting initial words
   useEffect(() => {
-    if (isRunning && !isPaused) {
+    if (isRunning) {
       if (showNextWord) {
         if (words.length < 2) {
           alert('Please add at least two words to use the "Show next word" feature.');
@@ -254,29 +199,28 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
       setNextRandomWord('');
       setCountdown(0);
     }
-  }, [isRunning, isPaused, showNextWord, words, selectWord, setIsRunning, startNewCycle]);
+  }, [isRunning, showNextWord, words, selectWord, setIsRunning, startNewCycle]);
 
   // Effect for handling the countdown interval
   useEffect(() => {
-    if (!isRunning || isPaused) {
+    if (!isRunning) {
       cleanupTimer();
       return;
     }
 
     countdownIntervalRef.current = setInterval(() => {
       setCountdown(prev => {
-        const next = prev - 1;
-        if (next <= 0) {
+        if (prev <= 1) {
           pickAndDisplayWord();
           startNewCycle();
           return timer * 60;
         }
-        return next;
+        return prev - 1;
       });
     }, 1000);
 
     return cleanupTimer;
-  }, [isRunning, isPaused, timer, pickAndDisplayWord, startNewCycle]);
+  }, [isRunning, timer, pickAndDisplayWord, startNewCycle]);
 
   return (
     <div className="random-word-area">
@@ -310,7 +254,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
                    nextRandomWord}
           </div>
         )}
-        {isRunning && randomWord && <span id="countdown">{Math.floor(countdown)}s</span>}
+        {isRunning && randomWord && <span id="countdown">{countdown}s</span>}
       </div>
       <div className="button-group">
         <button onClick={isRunning ? stop : start} className={isRunning ? 'stop' : 'go'}>
@@ -318,10 +262,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
         </button>
         {isRunning && (
           <>
-            <button onClick={togglePause} className="pause-play" disabled={isTogglingPause}>
-              {isPaused ? 'PLAY' : 'PAUSE'}
-            </button>
-            <button onClick={skip} className="skip" disabled={isSkipping}>
+            <button onClick={skip} className="skip">
               SKIP
             </button>
           </>
