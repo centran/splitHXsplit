@@ -16,16 +16,6 @@ const Timer = ({ timer, setTimer, isRunning, excludeConfig, setExcludeConfig, cu
             disabled={isRunning}
           />
         </div>
-        <div className="show-next-word-control">
-          <input
-            type="checkbox"
-            id="show-next-word-checkbox"
-            checked={showNextWord}
-            onChange={(e) => setShowNextWord(e.target.checked)}
-            disabled={isRunning}
-          />
-          <label htmlFor="show-next-word-checkbox">Show next word</label>
-        </div>
         <div className="text-case-group">
           <label>Text Case:</label>
           <div className="radio-group">
@@ -78,6 +68,16 @@ const Timer = ({ timer, setTimer, isRunning, excludeConfig, setExcludeConfig, cu
             disabled={isRunning}
           />
           <label htmlFor="exclude-toggle">Cooldown settings</label>
+        </div>
+        <div className="show-next-word-control">
+          <input
+            type="checkbox"
+            id="show-next-word-checkbox"
+            checked={showNextWord}
+            onChange={(e) => setShowNextWord(e.target.checked)}
+            disabled={isRunning}
+          />
+          <label htmlFor="show-next-word-checkbox">Show next word</label>
         </div>
         <div>
           <label htmlFor="words-count">Exclude X words:</label>

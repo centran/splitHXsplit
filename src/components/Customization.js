@@ -13,6 +13,18 @@ const Customization = ({ customization, onCustomizationChange }) => {
     <div className="customization-area">
       <h2>Customization</h2>
       <div className="control-group">
+        <label htmlFor="text-size-slider">Text Size:</label>
+        <input
+          type="range"
+          id="text-size-slider"
+          min="1"
+          max="5"
+          step="0.1"
+          value={customization.textSize}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="control-group">
         <label htmlFor="bg-color-input">Page Background:</label>
         <input
           type="color"
@@ -85,18 +97,6 @@ const Customization = ({ customization, onCustomizationChange }) => {
           <option value="drain">Drain</option>
           <option value="fill">Fill</option>
         </select>
-      </div>
-      <div className="control-group">
-        <label htmlFor="text-size-slider">Text Size:</label>
-        <input
-          type="range"
-          id="text-size-slider"
-          min="1"
-          max="5"
-          step="0.1"
-          value={customization.textSize}
-          onChange={handleChange}
-        />
       </div>
     </div>
   );
