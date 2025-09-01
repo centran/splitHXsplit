@@ -5,6 +5,8 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   const [nextRandomWord, setNextRandomWord] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isTogglingPause, setIsTogglingPause] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
   
   const countdownIntervalRef = useRef(null);
   const progressBarRef = useRef(null);
@@ -64,6 +66,10 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   };
 
   const togglePause = () => {
+    if (isTogglingPause) return;
+    setIsTogglingPause(true);
+    setTimeout(() => setIsTogglingPause(false), 500); // Debounce time
+
     setIsPaused(prevPaused => {
       const newPaused = !prevPaused;
       const bar = progressBarRef.current;
@@ -89,7 +95,9 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
   };
 
   const skip = () => {
-    if (!isRunning) return; // Don't skip if not running
+    if (isSkipping || !isRunning) return; // Don't skip if not running or already skipping
+    setIsSkipping(true);
+    setTimeout(() => setIsSkipping(false), 500); // Debounce time
     
     cleanupTimer();
     pickAndDisplayWord();
@@ -292,10 +300,10 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
         </button>
         {isRunning && (
           <>
-            <button onClick={togglePause} className="pause-play">
+            <button onClick={togglePause} className="pause-play" disabled={isTogglingPause}>
               {isPaused ? 'PLAY' : 'PAUSE'}
             </button>
-            <button onClick={skip} className="skip">
+            <button onClick={skip} className="skip" disabled={isSkipping}>
               SKIP
             </button>
           </>
