@@ -268,3 +268,25 @@ button:hover {
     border-radius: 4px;
     margin-left: 0.5rem;
 }
+
+#next-random-word {
+    font-size: 1.2rem;
+    font-weight: normal;
+    opacity: 0.7;
+    z-index: 1;
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.show-next-word-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.show-next-word-control label {
+    font-weight: normal;
+    cursor: pointer;
+}

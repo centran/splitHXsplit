@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Timer = ({ timer, setTimer, isRunning, excludeConfig, setExcludeConfig, customization, onCustomizationChange }) => {
+const Timer = ({ timer, setTimer, isRunning, excludeConfig, setExcludeConfig, customization, onCustomizationChange, showNextWord, setShowNextWord }) => {
   return (
     <div className="timer-area">
       <div className="timer-input-section">
@@ -59,6 +59,16 @@ const Timer = ({ timer, setTimer, isRunning, excludeConfig, setExcludeConfig, cu
         </div>
       </div>
       <div className="cool-down-section">
+        <div className="show-next-word-control">
+          <input
+            type="checkbox"
+            id="show-next-word-checkbox"
+            checked={showNextWord}
+            onChange={(e) => setShowNextWord(e.target.checked)}
+            disabled={isRunning}
+          />
+          <label htmlFor="show-next-word-checkbox">Show next word</label>
+        </div>
         <div>
           <input
             type="checkbox"
