@@ -81,7 +81,8 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
         if (prev <= 1) {
           if (isRunning) {
             pickAndDisplayWord();
-            return durationInSeconds;
+            startNewCycle();
+            return timer * 60;
           }
           return prev;
         }
