@@ -78,16 +78,33 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
         if (newPaused) {
           // PAUSING
           const computedStyle = window.getComputedStyle(bar);
-          const currentWidth = computedStyle.width;
+          const currentWidth = parseFloat(computedStyle.width);
           bar.style.transition = 'none';
-          bar.style.width = currentWidth;
-          remainingTimeRef.current = countdown;
+          bar.style.width = computedStyle.width;
+
+          const containerWidth = bar.parentElement.offsetWidth;
+          if (containerWidth > 0) {
+            const widthPercent = (currentWidth / containerWidth) * 100;
+            const durationInSeconds = timer * 60;
+
+            let remainingPercent;
+            if (customization.progressDirection === 'drain') {
+              remainingPercent = widthPercent;
+            } else {
+              remainingPercent = 100 - widthPercent;
+            }
+
+            const remainingTime = durationInSeconds * (remainingPercent / 100);
+            remainingTimeRef.current = remainingTime;
+          } else {
+            remainingTimeRef.current = countdown; // Fallback
+          }
         } else if (isRunning) {
           // RESUMING
           const remainingTime = remainingTimeRef.current;
           bar.style.transition = `width ${remainingTime}s linear`;
           bar.style.width = customization.progressDirection === 'drain' ? '0%' : '100%';
-          setCountdown(Math.ceil(remainingTime)); // Restore countdown
+          setCountdown(remainingTime); // Restore countdown, no Math.ceil
         }
       }
       return newPaused;
@@ -248,12 +265,13 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
 
     countdownIntervalRef.current = setInterval(() => {
       setCountdown(prev => {
-        if (prev <= 1) {
+        const next = prev - 1;
+        if (next <= 0) {
           pickAndDisplayWord();
           startNewCycle();
           return timer * 60;
         }
-        return prev - 1;
+        return next;
       });
     }, 1000);
 
@@ -292,7 +310,7 @@ const RandomWord = ({ words, isRunning, setIsRunning, timer, customization, show
                    nextRandomWord}
           </div>
         )}
-        {isRunning && randomWord && <span id="countdown">{countdown}s</span>}
+        {isRunning && randomWord && <span id="countdown">{Math.floor(countdown)}s</span>}
       </div>
       <div className="button-group">
         <button onClick={isRunning ? stop : start} className={isRunning ? 'stop' : 'go'}>
